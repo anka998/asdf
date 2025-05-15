@@ -1,53 +1,38 @@
-import psutil
+class Calculation:
+    def __init__(self):
+        self.calculationLine = ""
 
-import sqlite3
-from datetime import datetime
+    def SetCalculationLine(self, line):
+        self.calculationLine = line
+        print(f"Строка установлена: {self.calculationLine}")
 
-connection = sqlite3.connect('system_monitor.db')
-cursor = connection.cursor()
+    def SetLastSymbolCalculationLine(self, symbol):
+        self.calculationLine += symbol
+        print(f"Добавлен символ '{symbol}': {self.calculationLine}")
 
-def create_table():
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS monitoring (
-            id INTEGER PRIMARY KEY,
-            timestamp TEXT NOT NULL,
-            cpu_usage REAL NOT NULL,
-            memory_usage REAL NOT NULL,
-            disk_usage REAL NOT NULL
-        )
-    ''')
-    connection.commit()
+    def GetCalculationLine(self):
+        print(f"Текущая строка: {self.calculationLine}")
+        return self.calculationLine
 
-def record_monitoring():
-    cpu_usage = psutil.cpu_percent(interval=1)
-    memory_info = psutil.virtual_memory()
-    memory_usage = memory_info.percent
-    disk_info = psutil.disk_usage('/')
-    disk_usage = disk_info.percent
+    def GetLastSymbol(self):
+        if self.calculationLine:
+            print(f"Последний символ: {self.calculationLine[-1]}")
+            return self.calculationLine[-1]
+        print("Строка пустая, символ отсутствует")
+        return None
 
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    def DeleteLastSymbol(self):
+        if self.calculationLine:
+            removed = self.calculationLine[-1]
+            self.calculationLine = self.calculationLine[:-1]
+            print(f"Удалён последний символ '{removed}': {self.calculationLine}")
+        else:
+            print("Строка пустая, удалять нечего")
 
-    cursor.execute('''
-        INSERT INTO monitoring (timestamp, cpu_usage, memory_usage, disk_usage)
-        VALUES (?, ?, ?, ?)
-    ''', (timestamp, cpu_usage, memory_usage, disk_usage))
-
-    connection.commit()
-
-def view_monitoring_data():
-    cursor.execute('SELECT * FROM monitoring')
-    records = cursor.fetchall()
-
-    for record in records:
-        print(f"ID: {record[0]}, Time: {record[1]}, CPU: {record[2]}%, Memory: {record[3]}%, Disk: {record[4]}%")
-
-create_table()
-
-for _ in range(5):
-    record_monitoring()
-
-view_monitoring_data()
-
-connection.close()
-
-
+calc = Calculation()
+calc.SetCalculationLine("123")
+calc.SetLastSymbolCalculationLine("4")
+calc.GetCalculationLine()
+calc.GetLastSymbol()
+calc.DeleteLastSymbol()
+calc.GetCalculationLine()
